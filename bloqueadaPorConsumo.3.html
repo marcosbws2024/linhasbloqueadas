@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Relatório de Linhas Bloqueadas por Consumo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    /* Fonte base */
+    body {
+      background: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #343a40;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+    }
+
+    /* Card */
+    .card {
+      border-radius: 1rem;
+      box-shadow:
+        0 0.5rem 1rem rgba(0,0,0,0.15),
+        0 0.125rem 0.25rem rgba(0,0,0,0.1);
+      background: #fff;
+      transition: box-shadow 0.3s ease-in-out;
+    }
+    .card:hover {
+      box-shadow:
+        0 1rem 2rem rgba(0,0,0,0.25),
+        0 0.25rem 0.5rem rgba(0,0,0,0.15);
+    }
+
+    /* Header */
+    h3 {
+      font-weight: 700;
+      font-size: 1.9rem;
+      color: #fd0d0d;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3 i {
+      font-size: 2.2rem;
+      color: #ff0000;
+    }
+
+    /* File input customizado */
+    input[type="file"] {
+      cursor: pointer;
+      border: 2px dashed #0d6efd;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      background: #e9f0ff;
+      transition: background-color 0.3s ease;
+    }
+    input[type="file"]:hover {
+      background: #d0e2ff;
+    }
+
+    /* Botões */
+    #exportBtn, #clearBtn {
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 0.4rem 0.8rem rgba(13, 110, 253, 0.4);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    #exportBtn:disabled {
+      background-color: #6c757d !important;
+      box-shadow: none !important;
+      cursor: not-allowed;
+    }
+    #exportBtn:not(:disabled):hover {
+      background-color: #0b5ed7;
+      box-shadow: 0 0.6rem 1.2rem rgba(13, 110, 253, 0.6);
+    }
+    #exportBtn i, #clearBtn i {
+      font-size: 1.3rem;
+      vertical-align: middle;
+    }
+    #clearBtn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+    }
+    #clearBtn:hover {
+      background-color: #b02a37;
+      box-shadow: 0 0.6rem 1.2rem rgba(220, 53, 69, 0.6);
+      cursor: pointer;
+    }
+
+    /* Tabela */
+    .table {
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow:
+        0 0.25rem 0.5rem rgba(0,0,0,0.1);
+      background: #fff;
+    }
+    thead.table-light {
+      background-color: #0d6efd;
+      color: white;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    thead.table-light th {
+      border-bottom: none;
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #f1f5fb;
+    }
+    tbody tr:hover {
+      background-color: #cfe2ff;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .table th, .table td {
+      vertical-align: middle;
+      white-space: nowrap;
+      padding: 0.75rem 1rem;
+    }
+
+    /* Scroll horizontal suave */
+    .table-responsive {
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: inset 0 0 10px rgb(0 0 0 / 0.05);
+    }
+
+    /* Responsividade */
+    @media (max-width: 575.98px) {
+      h3 {
+        font-size: 1.5rem;
+        justify-content: center;
+      }
+      h3 i {
+        font-size: 1.7rem;
+      }
+      .table th, .table td {
+        padding: 0.5rem 0.4rem;
+        font-size: 0.85rem;
+      }
+      #exportBtn, #clearBtn {
+        font-size: 1rem;
+        padding: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card p-4">
+        <h3><i class="bi bi-file-earmark-spreadsheet"></i> Relatório de Linhas Bloqueadas por Consumo</h3>
+
+        <div class="mb-3">
+          <label for="fileInput" class="form-label fw-semibold">Selecione o arquivo CSV (.csv):</label>
+          <input class="form-control" type="file" id="fileInput" accept=".csv" />
+        </div>
+
+        <div class="d-flex gap-3 mb-3">
+          <button class="btn btn-success flex-grow-1" id="exportBtn" disabled>
+            <i class="bi bi-file-earmark-spreadsheet-fill"></i> Exportar XLSX
+          </button>
+          <button class="btn btn-danger flex-grow-1" id="clearBtn" title="Limpar tabela e seleção de arquivo">
+            <i class="bi bi-x-circle"></i> Limpar
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered" id="outputTable">
+            <thead class="table-light" id="tableHead">
+              <!-- Cabeçalho gerado dinamicamente -->
+            </thead>
+            <tbody id="outputBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+  let linhasBloqueadasConsumo = [];
+  let linhasBloqueadasFuncional = [];
+  let linhasSuspensas = [];
+  let nomeArquivoBase = "relatorio_linhas_bloqueadas";
+
+  const colunasDesejadas = [
+    'Cliente',
+    'ICCID',
+    'MSISDN',
+    'Último IMEI',
+    'Último Acesso',
+    'Produto',
+    'Status'
+  ];
+
+  document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+  document.getElementById('exportBtn').addEventListener('click', exportarXLSX);
+  document.getElementById('clearBtn').addEventListener('click', limparTudo);
+
+  function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) {
+      limparTudo();
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const texto = e.target.result;
+      definirNomeArquivoBase(texto);
+      processarCSV(texto);
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  function definirNomeArquivoBase(texto) {
+    const linhas = texto.split("\n").filter(l => l.trim() !== "");
+    if (linhas.length < 2) return;
+
+    const segundaLinha = linhas[1].split(";")[0] || "relatorio_linhas_bloqueadas";
+    nomeArquivoBase = segundaLinha.trim().replace(/\s+/g, "_").replace(/^['"]|['"]$/g, "");
+  }
+
+  function processarCSV(texto) {
+    const linhas = texto.split('\n').filter(l => l.trim() !== '');
+    const cabecalhoOriginal = linhas[0].split(';').map(h => limpar(h));
+
+    const indices = mapearIndicesColunas(cabecalhoOriginal);
+    if (!indices) return;
+
+    limparTabela();
+
+    linhasBloqueadasConsumo = [];
+    linhasBloqueadasFuncional = [];
+    linhasSuspensas = [];
+
+    for (let i = 1; i < linhas.length; i++) {
+      const colunas = linhas[i].split(';').map(limpar);
+      if (colunas.length < cabecalhoOriginal.length) continue;
+
+      const status = colunas[indices['Status']].toLowerCase();
+      let objLinha = {};
+
+      for (const col of colunasDesejadas) {
+        objLinha[col] = colunas[indices[col]] || '';
+      }
+
+      if (status === 'bloqueado_consumo') {
+        linhasBloqueadasConsumo.push(objLinha);
+      } else if (status === 'bloqueado_funcional') {
+        linhasBloqueadasFuncional.push(objLinha);
+      } else if (status === 'suspenso') {
+        linhasSuspensas.push(objLinha);
+      }
+    }
+
+    exibirNaTabela([...linhasBloqueadasConsumo, ...linhasBloqueadasFuncional, ...linhasSuspensas]);
+
+    const totalRegistros = linhasBloqueadasConsumo.length + linhasBloqueadasFuncional.length + linhasSuspensas.length;
+    document.getElementById('exportBtn').disabled = totalRegistros === 0;
+  }
+
+  function mapearIndicesColunas(cabecalho) {
+    const indices = {};
+    for (const col of colunasDesejadas) {
+      const idx = cabecalho.findIndex(c => c.toLowerCase() === col.toLowerCase());
+      if (idx === -1) {
+        alert(`Coluna '${col}' não encontrada no arquivo.`);
+        limparTudo();
+        return null;
+      }
+      indices[col] = idx;
+    }
+    return indices;
+  }
+
+  function exibirNaTabela(linhas) {
+    const thead = document.getElementById('tableHead');
+    const tbody = document.getElementById('outputBody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    const trHead = document.createElement('tr');
+    for (const col of colunasDesejadas) {
+      const th = document.createElement('th');
+      th.textContent = col;
+      trHead.appendChild(th);
+    }
+    thead.appendChild(trHead);
+
+    for (const linha of linhas) {
+      const tr = document.createElement('tr');
+      for (const col of colunasDesejadas) {
+        const td = document.createElement('td');
+        td.textContent = linha[col];
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+  }
+
+  function exportarXLSX() {
+    if (linhasBloqueadasConsumo.length === 0 && linhasBloqueadasFuncional.length === 0 && linhasSuspensas.length === 0) {
+      alert('Nenhum dado para exportar!');
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const timestamp = getTimestamp();
+
+    if (linhasBloqueadasConsumo.length > 0) {
+      const wsConsumo = XLSX.utils.json_to_sheet(linhasBloqueadasConsumo, { header: colunasDesejadas });
+      XLSX.utils.book_append_sheet(wb, wsConsumo, 'Bloqueado_Consumo');
+    }
+
+    if (linhasBloqueadasFuncional.length > 0) {
+      const wsFuncional = XLSX.utils.json_to_sheet(linhasBloqueadasFuncional, { header: colunasDesejadas });
+      XLSX.utils.book_append_sheet(wb, wsFuncional, 'Bloqueado_Funcional');
+    }
+
+    if (linhasSuspensas.length > 0) {
+      const wsSuspenso = XLSX.utils.json_to_sheet(linhasSuspensas, { header: colunasDesejadas });
+      XLSX.utils.book_append_sheet(wb, wsSuspenso, 'Suspenso');
+    }
+
+    const nomeArquivoFinal = `${nomeArquivoBase}_${timestamp}.xlsx`;
+    XLSX.writeFile(wb, nomeArquivoFinal);
+  }
+
+  function limpar(texto) {
+    if (!texto) return '';
+    return texto.trim().replace(/^['"]+|['"]+$/g, '');
+  }
+
+  function limparTabela() {
+    document.getElementById('tableHead').innerHTML = '';
+    document.getElementById('outputBody').innerHTML = '';
+  }
+
+  function limparTudo() {
+    limparTabela();
+    document.getElementById('fileInput').value = '';
+    document.getElementById('exportBtn').disabled = true;
+    linhasBloqueadasConsumo = [];
+    linhasBloqueadasFuncional = [];
+    linhasSuspensas = [];
+  }
+
+  function getTimestamp() {
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  }
+</script>
+
+
+</body>
+</html>
